@@ -25,14 +25,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     psmisc \
     && rm -rf /var/lib/apt/lists/*
 
+# Бинарник сервера
 COPY bin/ /opt/hub/bin/
 RUN chmod +x /opt/hub/bin/HUB-C2PP
 
+# Файлы интеграции для автокопирования в /config/custom_components/
+COPY integration/ /opt/hub/integration/
+
+# Скрипт запуска
 COPY run.sh /
 RUN chmod +x /run.sh
 
 LABEL \
-  io.hass.version="1.0.2" \
+  io.hass.version="1.0.3" \
   io.hass.type="app" \
   io.hass.arch="aarch64|amd64"
 

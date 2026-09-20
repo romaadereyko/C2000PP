@@ -1,5 +1,5 @@
 name: "HUB-C2000PP Configurator"
-version: "1.0.2"
+version: "1.0.3"
 slug: "hub_c2000pp_configurator"
 description: "Веб-конфигуратор HUB-C2000PP (VNC через браузер)"
 url: "https://partners.bolid.ru/forum/forum_23451.html"
