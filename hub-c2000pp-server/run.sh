@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================="
-echo "  HUB-C2000PP Server v1.0.3"
+echo "  HUB-C2000PP Server v1.0.4"
 echo "========================================="
 
 OPTIONS_FILE="/data/options.json"

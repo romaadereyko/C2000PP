@@ -1,5 +1,5 @@
 name: "HUB-C2000PP Server"
-version: "1.0.3"
+version: "1.0.4"
 slug: "hub_c2000pp_server"
 description: "Сервер HUB-C2000PP для Bolid C2000-ПП + автоустановка интеграции"
 url: "https://github.com/Regressor/hass-hubc2000pp"
@@ -21,7 +21,9 @@ uart: true
 # Маппинги: data — постоянное хранилище аддона, config — папка HA для установки интеграции
 map:
   - type: data
-  - type: config
+  - type: homeassistant_config
+    read_only: false
+    path: /config
 
 ports:
   55321/tcp: 55321
