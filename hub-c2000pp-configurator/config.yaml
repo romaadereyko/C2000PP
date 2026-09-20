@@ -1,0 +1,27 @@
+name: "HUB-C2000PP Configurator"
+version: "1.0.0"
+slug: "hub_c2000pp_configurator"
+description: "Веб-конфигуратор HUB-C2000PP (VNC через браузер)"
+url: "https://partners.bolid.ru/forum/forum_23451.html"
+arch:
+  - amd64
+  - aarch64
+init: false
+startup: application
+boot: manual
+host_network: true
+
+webui: "http://[HOST]:[PORT:8080]/vnc.html"
+panel_icon: mdi:monitor-dashboard
+panel_title: "HUB-C2000PP Configurator"
+
+ports:
+  8080/tcp: 8080
+ports_description:
+  8080/tcp: "noVNC Web Interface"
+
+options:
+  vnc_password: ""
+
+schema:
+  vnc_password: "str?"
