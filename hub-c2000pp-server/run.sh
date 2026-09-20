@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================="
-echo "  HUB-C2000PP Server v1.0.4"
+echo "  HUB-C2000PP Server v1.0.5"
 echo "========================================="
 
 OPTIONS_FILE="/data/options.json"
@@ -15,8 +15,10 @@ AUTO_INSTALL=$(jq -r '.auto_install_integration // "true"' "$OPTIONS_FILE")
 WORK_DIR="/data/hub"
 INTEGRATION_SRC="/opt/hub/integration/hubc2000pp"
 INTEGRATION_DST="/config/custom_components/hubc2000pp"
+MARKER_FILE="/data/.integration_installed"
 
 SERVER_PID=""
+FIRST_INSTALL=0
 
 cleanup() {
     echo "[*] Останавливаем сервер..."
@@ -34,30 +36,34 @@ pkill -f HUB-C2PP 2>/dev/null || true
 sleep 1
 
 # ============================================================
-# 1. АВТОУСТАНОВКА ИНТЕГРАЦИИ В HOME ASSISTANT
+# 1. УСТАНОВКА ИНТЕГРАЦИИ (только при первом запуске или обновлении)
 # ============================================================
-echo "[1/5] Проверка интеграции hubc2000pp в Home Assistant..."
+echo "[1/5] Проверка интеграции hubc2000pp..."
 
-if [ "$AUTO_INSTALL" = "true" ]; then
-    if [ ! -d "$INTEGRATION_SRC" ]; then
-        echo "       ВНИМАНИЕ: папка $INTEGRATION_SRC не найдена в образе."
-        echo "       Проверь, что файлы интеграции скопированы в integration/hubc2000pp/"
-    elif [ -d "$INTEGRATION_DST" ]; then
-        # Интеграция уже есть — обновляем файлы (могут быть новее в аддоне)
-        echo "       Интеграция уже установлена — обновляем файлы..."
-        cp -rf "$INTEGRATION_SRC/." "$INTEGRATION_DST/"
-        echo "       Обновлено: $INTEGRATION_DST"
-    else
-        # Первая установка
-        echo "       Интеграция не найдена — устанавливаем..."
-        mkdir -p /config/custom_components
-        cp -rf "$INTEGRATION_SRC" "$INTEGRATION_DST"
-        echo "       Установлено: $INTEGRATION_DST"
-        echo ""
-        echo "       ⚠️  ПЕРЕЗАГРУЗИ HOME ASSISTANT, чтобы интеграция появилась в Настройки → Устройства и службы"
-    fi
-else
+if [ "$AUTO_INSTALL" != "true" ]; then
     echo "       Автоустановка отключена (auto_install_integration: false)"
+elif [ ! -d "$INTEGRATION_SRC" ]; then
+    echo "       ВНИМАНИЕ: папка $INTEGRATION_SRC не найдена в образе."
+    echo "       Проверь, что файлы интеграции скопированы в integration/hubc2000pp/"
+elif [ ! -f "$MARKER_FILE" ]; then
+    # ---------- ПЕРВАЯ УСТАНОВКА ----------
+    echo "       Первая установка интеграции..."
+    mkdir -p /config/custom_components
+    rm -rf "$INTEGRATION_DST"
+    cp -rf "$INTEGRATION_SRC" "$INTEGRATION_DST"
+
+    # Создаём marker — при следующих запусках пойдём по ветке "обновление"
+    touch "$MARKER_FILE"
+
+    echo "       Установлено: $INTEGRATION_DST"
+    FIRST_INSTALL=1
+else
+    # ---------- ПОВТОРНЫЙ ЗАПУСК: тихое обновление ----------
+    echo "       Интеграция уже установлена — обновляем файлы..."
+    cp -rf "$INTEGRATION_SRC/." "$INTEGRATION_DST/" 2>/dev/null || {
+        echo "       ВНИМАНИЕ: не удалось обновить файлы интеграции."
+    }
+    echo "       Обновлено: $INTEGRATION_DST"
 fi
 
 # ============================================================
@@ -119,16 +125,26 @@ else
     exit 1
 fi
 
+# ============================================================
+# ФИНАЛЬНЫЕ СООБЩЕНИЯ
+# ============================================================
 echo "========================================="
 echo "  Сервер запущен."
 echo "  Рабочая папка: $WORK_DIR"
-echo "    ├── HUB-C2PP"
-echo "    ├── Events/   (события)"
-echo "    └── log/      (логи)"
 echo "  Порты: TCP 55321 | UDP 22000, 22001"
-echo ""
-echo "  Если интеграция установлена впервые —"
-echo "  ПЕРЕЗАГРУЗИ Home Assistant."
+
+if [ "$FIRST_INSTALL" = "1" ]; then
+    echo ""
+    echo "  ╔════════════════════════════════════════════╗"
+    echo "  ║  ⚠️  ТРЕБУЕТСЯ ПЕРЕЗАГРУЗКА HOME ASSISTANT  ║"
+    echo "  ╚════════════════════════════════════════════╝"
+    echo ""
+    echo "  Интеграция hubc2000pp установлена впервые."
+    echo "  Перезагрузи HA: Настройки → Система → Перезагрузить"
+    echo "  После этого добавь её:"
+    echo "    Настройки → Устройства и службы → + Добавить интеграцию → hubc2000pp"
+fi
+
 echo "========================================="
 
 # --- Перезапуск при падении ---

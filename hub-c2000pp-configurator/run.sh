@@ -2,7 +2,7 @@
 set -e
 
 echo "========================================="
-echo "  HUB-C2000PP Configurator (noVNC) v1.0.4"
+echo "  HUB-C2000PP Configurator (noVNC) v1.0.5"
 echo "========================================="
 
 OPTIONS_FILE="/data/options.json"
