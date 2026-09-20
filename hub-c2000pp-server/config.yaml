@@ -1,5 +1,5 @@
 name: "HUB-C2000PP Server"
-version: "1.0.0"
+version: "1.0.1"
 slug: "hub_c2000pp_server"
 description: "Сервер HUB-C2000PP для Bolid C2000-ПП"
 url: "https://partners.bolid.ru/forum/forum_23451.html"
@@ -14,11 +14,24 @@ host_network: true
 panel_icon: mdi:shield-home
 panel_title: "HUB-C2000PP Server"
 
+usb: true
+uart: true
+
+map:
+  - type: data
+
 ports:
   55321/tcp: 55321
   22000/udp: 22000
   22001/udp: 22001
 ports_description:
-  55321/tcp: "HUB-C2000PP Server Port (для Configurator и HA)"
+  55321/tcp: "HUB-C2000PP Server Port"
   22000/udp: "HUB-C2000PP HA Sync (PING/PONG)"
-  22001/udp: "HUB-C2000PP HA Comm (push events)"	
+  22001/udp: "HUB-C2000PP HA Comm (push events)"
+
+options:
+  connection_type: "ethernet"
+
+schema:
+  connection_type: "list(usb|ethernet)"
+  usb_device: "device(subsystem=tty)?"
